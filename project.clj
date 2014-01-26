@@ -1,3 +1,22 @@
+(defmacro nodejs-config
+  [name]
+  `{:source-paths [~(str "src/cljs/" name)]
+    :id ~name
+    :compiler {:output-to ~(str "target/bin/" name ".js")
+               :target :nodejs
+               :optimizations :simple
+               :pretty-print true}})
+
+(defmacro web-config
+  ([name]
+   `(web-config ~name ~name))
+  ([name js-name]
+   `{:source-paths [~(str "src/cljs/" name)]
+     :id ~name
+     :compiler {:output-to ~(str "target/resources/public/" name "/" js-name ".js")
+                :optimizations :simple
+                :pretty-print true}}))
+
 (defproject dart-tutorials-cljs "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
@@ -11,64 +30,21 @@
   ;:hooks [leiningen.cljsbuild]
   :source-paths ["src/clj"]
   :resource-paths ["resources" "target/resources"]
-  :cljsbuild {:builds [{:source-paths ["src/cljs/anagram"]
-                        :compiler {:output-to "target/resources/public/anagram/anagram.js"
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/clickme"]
-                        :compiler {:output-to "target/resources/public/clickme/clickme.js"
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/feet_wet_streams"]
-                        :compiler {:output-to "target/bin/feet_wet_streams.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/futures1"]
-                        :compiler {:output-to "target/bin/futures1.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/futures2"]
-                        :compiler {:output-to "target/bin/futures2.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/futures3"]
-                        :compiler {:output-to "target/bin/futures3.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/futures4"]
-                        :compiler {:output-to "target/bin/futures4.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/futures5"]
-                        :compiler {:output-to "target/bin/futures5.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/helloworld"]
-                        :compiler {:output-to "target/bin/helloworld.js"
-                                   :target :nodejs
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/mini"]
-                        :compiler {:output-to "target/resources/public/mini/mini.js"
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/stopwatch"]
-                        :compiler {:output-to "target/resources/public/stopwatch/tute_stopwatch.js"
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/todo"]
-                        :compiler {:output-to "target/resources/public/todo/todo.js"
-                                   :optimizations :simple
-                                   :pretty-print true}}
-                       {:source-paths ["src/cljs/todo_with_delete"]
-                        :compiler {:output-to "target/resources/public/todo_with_delete/todo_with_delete.js"
-                                   :optimizations :simple
-                                   :pretty-print true}}]}
+  :cljsbuild {:builds [~(web-config "anagram")
+                       ~(web-config "clickme")
+                       ~(nodejs-config "feet_wet_streams")
+                       ~(nodejs-config "futures1")
+                       ~(nodejs-config "futures2")
+                       ~(nodejs-config "futures3")
+                       ~(nodejs-config "futures4")
+                       ~(nodejs-config "futures5")
+                       ~(nodejs-config "futures5")
+                       ~(nodejs-config "helloworld")
+                       ~(web-config "its_all_about_you" "tute_its_all_about_you")
+                       ~(web-config "mini")
+                       ~(web-config "stopwatch" "tute_stopwatch")
+                       ~(web-config "mini")
+                       ~(web-config "todo")
+                       ~(web-config "todo_with_delete")]}
   :ring {:handler dart-tutorials.server/app
          :nrepl {:start? true}})
