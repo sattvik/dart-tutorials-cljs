@@ -19,6 +19,11 @@
                         :compiler {:output-to "target/resources/public/clickme/clickme.js"
                                    :optimizations :simple
                                    :pretty-print true}}
+                       {:source-paths ["src/cljs/helloworld"]
+                        :compiler {:output-to "target/bin/helloworld.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
                        {:source-paths ["src/cljs/mini"]
                         :compiler {:output-to "target/resources/public/mini/mini.js"
                                    :optimizations :simple
