@@ -3,6 +3,7 @@
   :url "http://example.com/FIXME"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2138"]
+                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
                  [domina "1.0.2"]
                  [compojure "1.1.6"]]
   :plugins [[lein-cljsbuild "1.0.1"]
@@ -20,6 +21,10 @@
                                    :pretty-print true}}
                        {:source-paths ["src/cljs/mini"]
                         :compiler {:output-to "target/resources/public/mini/mini.js"
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:source-paths ["src/cljs/stopwatch"]
+                        :compiler {:output-to "target/resources/public/stopwatch/tute_stopwatch.js"
                                    :optimizations :simple
                                    :pretty-print true}}
                        {:source-paths ["src/cljs/todo"]
