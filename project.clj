@@ -19,6 +19,11 @@
                         :compiler {:output-to "target/resources/public/clickme/clickme.js"
                                    :optimizations :simple
                                    :pretty-print true}}
+                       {:source-paths ["src/cljs/feet_wet_streams"]
+                        :compiler {:output-to "target/bin/feet_wet_streams.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
                        {:source-paths ["src/cljs/futures1"]
                         :compiler {:output-to "target/bin/futures1.js"
                                    :target :nodejs
