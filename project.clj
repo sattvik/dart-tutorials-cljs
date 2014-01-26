@@ -19,6 +19,31 @@
                         :compiler {:output-to "target/resources/public/clickme/clickme.js"
                                    :optimizations :simple
                                    :pretty-print true}}
+                       {:source-paths ["src/cljs/futures1"]
+                        :compiler {:output-to "target/bin/futures1.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:source-paths ["src/cljs/futures2"]
+                        :compiler {:output-to "target/bin/futures2.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:source-paths ["src/cljs/futures3"]
+                        :compiler {:output-to "target/bin/futures3.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:source-paths ["src/cljs/futures4"]
+                        :compiler {:output-to "target/bin/futures4.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:source-paths ["src/cljs/futures5"]
+                        :compiler {:output-to "target/bin/futures5.js"
+                                   :target :nodejs
+                                   :optimizations :simple
+                                   :pretty-print true}}
                        {:source-paths ["src/cljs/helloworld"]
                         :compiler {:output-to "target/bin/helloworld.js"
                                    :target :nodejs
