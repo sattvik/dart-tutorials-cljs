@@ -44,6 +44,7 @@
                        ~(web-config "mini")
                        ~(web-config "stopwatch" "tute_stopwatch")
                        ~(web-config "mini")
+                       ~(nodejs-config "slambookserver")
                        ~(web-config "todo")
                        ~(web-config "todo_with_delete")]}
   :ring {:handler dart-tutorials.server/app
