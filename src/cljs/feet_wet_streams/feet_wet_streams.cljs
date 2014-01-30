@@ -1,5 +1,6 @@
 (ns feet-wet-streams
-  (:require [cljs.core.async :refer [<! chan take! tap to-chan] :as async])
+  (:require [cljs.core.async :refer [<! chan take! tap to-chan] :as async]
+            [cljs.nodejs :as node])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (defn listen [c listener]
@@ -91,6 +92,7 @@
     (listen transformed #(println "transform-listen:" %))))
 
 (defn main []
+  (node/enable-util-print!)
   (single-stream)
   (stream-properties)
   (broadcast)

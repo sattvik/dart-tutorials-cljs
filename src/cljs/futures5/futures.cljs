@@ -26,6 +26,7 @@
   "from expensive-c")
 
 (defn main []
+  (node/enable-util-print!)
   (go 
     (let [futures [(future expensive-a)
                    (future expensive-b)

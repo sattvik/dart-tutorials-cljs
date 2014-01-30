@@ -23,10 +23,10 @@
   "from expensive-c")
 
 (defn main []
+  (node/enable-util-print!)
   (go 
     (<! (future expensive-a))
     (<! (future expensive-b))
-    (do-something-with (<! (future expensive-c))))
-)
+    (do-something-with (<! (future expensive-c)))))
 
 (set! *main-cli-fn* main)

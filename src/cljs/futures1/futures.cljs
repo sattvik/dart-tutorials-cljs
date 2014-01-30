@@ -16,6 +16,7 @@
   (println "Baseball score: Red Sox 10, Yankees 0"))
 
 (defn main []
+  (node/enable-util-print!)
   (print-daily-news-digest)
   (print-winning-lottery-numbers)
   (print-weather-forecast)
