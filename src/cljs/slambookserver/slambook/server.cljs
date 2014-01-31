@@ -9,8 +9,8 @@
   (dorun
     (map #(.setHeader response (name (key %)) (val %))
          {:Access-Control-Allow-Origin "*"
-          :Access-Control-Allow-Methods "POST, OPTIONS"
-          :Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept"})))
+          :Access-Control-Allow-Methods "POST, OPTIONS, GET, PUT"
+          :Access-Control-Allow-Headers "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With"})))
 
 (defmulti request-handler
   (fn [request response]
