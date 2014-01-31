@@ -8,7 +8,7 @@
   [response]
   (dorun
     (map #(.setHeader response (name (key %)) (val %))
-         {:Access-Control-Allow-Origin "*, "
+         {:Access-Control-Allow-Origin "*"
           :Access-Control-Allow-Methods "POST, OPTIONS"
           :Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept"})))
 
@@ -45,6 +45,7 @@
 
 (defmethod request-handler :default
   [request response]
+  (println (str (.-method request) ": " (get-path request)))
   (add-cors-headers response)
   (set! (.-statusCode response) 404)
   (.write response
