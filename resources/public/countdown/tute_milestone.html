@@ -1,0 +1,20 @@
+<!-- Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
+     for details. All rights reserved. Use of this source code is governed by a
+     BSD-style license that can be found in the LICENSE file.
+-->
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link rel="import" href="/polymer/polymer.html">
+  </head>
+  <body>   
+    <polymer-element name="tute-milestone" attributes="milestone">
+      <template>
+        <span>{{milestone.timeRemainingAsString}}</span> <button on-click="{{removeMilestone}}">-</button>
+      </template>
+      <script src="tute_milestone.js"></script>
+    </polymer-element>
+  </body>
+</html>

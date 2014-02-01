@@ -32,6 +32,18 @@
   :resource-paths ["resources" "target/resources"]
   :cljsbuild {:builds [~(web-config "anagram")
                        ~(web-config "clickme")
+                       {:source-paths ["src/cljs/countdown/tute_milestone/"
+                                       "src/cljs/countdown/app/"]
+                        :id "countdown"
+                        :compiler {:output-to "target/resources/public/countdown/tute_milestone.js"
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:source-paths ["src/cljs/countdown/tute_countdown/"
+                                       "src/cljs/countdown/app/"]
+                        :id "countdown"
+                        :compiler {:output-to "target/resources/public/countdown/tute_countdown.js"
+                                   :optimizations :simple
+                                   :pretty-print true}}
                        ~(nodejs-config "feet_wet_streams")
                        ~(nodejs-config "futures1")
                        ~(nodejs-config "futures2")
