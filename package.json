@@ -1,0 +1,8 @@
+{
+  "name": "dart-tutorials-cljs",
+  "version": "0.1.0-SNAPSHOT",
+  "description":  "A Clojure port of the Dart tutorials",
+  "dependencies": {
+    "optimist": "~0.6.0"
+  }
+}
