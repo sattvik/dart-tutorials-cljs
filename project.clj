@@ -55,10 +55,9 @@
                        ~(nodejs-config "helloworld")
                        ~(web-config "its_all_about_you" "tute_its_all_about_you")
                        ~(web-config "mini")
-                       ~(web-config "stopwatch" "tute_stopwatch")
-                       ~(web-config "mini")
                        ~(web-config "slambook" "tute_slambookform")
                        ~(nodejs-config "slambookserver")
+                       ~(web-config "stopwatch" "tute_stopwatch")
                        ~(web-config "todo")
                        ~(web-config "todo_with_delete")]}
   :ring {:handler dart-tutorials.server/app
