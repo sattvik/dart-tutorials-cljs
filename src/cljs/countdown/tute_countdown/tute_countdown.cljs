@@ -2,7 +2,8 @@
   (:require [cljs.core.async :refer [<!]]
             [goog.date.DateTime :as date-time]
             [goog.dom :as dom]
-            [countdown.app :as app])
+            [countdown.app :as app]
+            [countdown.messages :refer [error?]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def new-milestone-name (atom "New Year's Day"))
@@ -45,26 +46,34 @@
                     (aset this "appObj" clj))))
     (let [start-status (app/start)]
       (go
-        (let [{:keys [status] :as result} (<! start-status)]
-          (if (= status :error)
+        (let [result (<! start-status)]
+          (if (error? result)
             (do
               (dorun
                 (map #(set! (.-disabled (aget (.-$ this) %)) true)
                      ["addbutton" "clearbutton"]))
               (reset! error-message (:message result)))
-            (.log js/console "OK!")))))))
+            (reset! error-message "")))))))
 
 (defn on-detach []
   (app/stop))
 
 (defn add-milestone
   [event detail sender]
-  (let [when (date-time/fromRfc822String (str @new-milestone-date " " @new-milestone-time))]
-    (app/add-milestone @new-milestone-name when)))
+  (go
+    (let [when (date-time/fromRfc822String (str @new-milestone-date " " @new-milestone-time))
+          result (<! (app/add-milestone @new-milestone-name when))]
+    (if (error? result)
+      (reset! error-message (:message result))
+      (reset! error-message "")))))
 
 (defn clear
   []
-  (app/clear-milestones))
+  (go
+    (let [result (<! (app/clear-milestones))]
+      (if (error? result)
+        (reset! error-message (:message result))
+        (reset! error-message "")))))
 
 (js/Polymer "tute-count-down"
             #js {:newMilestoneName @new-milestone-name
@@ -79,5 +88,4 @@
                  :detached on-detach
                  :addMilestone add-milestone
                  :appObj (clj->js @app/instance)
-                 :clear clear
-                 })
+                 :clear clear})

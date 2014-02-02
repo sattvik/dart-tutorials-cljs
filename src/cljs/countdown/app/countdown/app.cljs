@@ -1,5 +1,8 @@
 (ns countdown.app
-  (:require [cljs.core.async :as async :refer [>! <! chan close!]]
+  (:require [cljs.core.async :as async :refer [>! <! chan close! put!]]
+            [countdown.db :as db]
+            [countdown.messages :refer [make-error error?]]
+            [countdown.milestone :as ms]
             [goog.date.DateTime])
   (:require-macros [cljs.core.async.macros :refer [alt! go go-loop]]))
 
@@ -35,65 +38,70 @@
 
 (defonce timer (create-timer))
 
-(defrecord Milestone [milestoneName happensOn timeRemainingAsString])
-
-(defn duration->string
-  [duration name]
-  (let [days (quot duration 86400)
-        hours (rem (quot duration 3600) 24)
-        minutes (rem (quot duration 360) 60)
-        seconds (rem duration 60)]
-    (reduce str
-            (conj (mapv #(if (zero? %1) "" (str %1 %2))
-                        [days hours minutes seconds]
-                        [" days, " " hours, " " minutes, " " seconds "])
-                  (str "until " name)))))
-
 (defn add-milestone
   [name occurs-on]
-  (let [now-ms (.getTime (goog.date.DateTime.))
+  (let [c (chan)
+        now-ms (.getTime (goog.date.DateTime.))
         occurs-ms (.getTime occurs-on)
         duration (quot (- occurs-ms now-ms) 1000)]
-    (when (pos? duration)
-      (swap! instance
-             (fn [{:keys [milestones] :as state}]
-               (assoc state
-                      :hazMilestones true
-                      :milestones (conj milestones (map->Milestone {:milestoneName name
-                                                                    :happensOn occurs-on
-                                                                    :timeRemainingAsString (duration->string duration name)})))))
-      (go (>! (:control timer) :start)))))
+    (go
+      (if (pos? duration)
+        (let [add-result (<! (db/add-milestone (ms/create-milestone name occurs-on)))]
+          (.log js/console "add result:" add-result)
+          (if (error? add-result)
+            (>! c add-result)
+            (do
+              (put! (:control timer) :start)
+              (swap! instance
+                     (fn [{:keys [milestones] :as state}]
+                       (assoc state
+                              :hazMilestones true
+                              :milestones (conj milestones (:value add-result)))))
+              (>! c add-result))))
+        (>! c (make-error "Cannot add events in the past.")))
+      (close! c))
+    c))
 
 (defn remove-milestone
   [milestone]
-  (swap! instance
-         (fn [{:keys [milestones] :as state}]
-           (let [[chunk-a chunk-b] (split-with #(or (not= (aget milestone "milestoneName")
-                                                          (aget % "milestoneName"))
-                                                    (not= (aget milestone "happensOn")
-                                                          (aget % "happensOn")))
-                                               milestones)
-                 new-milestones (apply vector (concat chunk-a (next chunk-b)))
-                 have-milestones? (not (empty? milestones))]
-             (when (not have-milestones?)
-               (go (>! (:control timer) :stop)))
-             (assoc state
-                    :milestones new-milestones
-                    :hazMilestones have-milestones?)))))
+  (let [c (chan)]
+    (go
+      (let [result (<! (db/remove-milestone milestone))]
+        (when-not (error? result)
+          (swap! instance
+                 (fn [{:keys [milestones] :as state}]
+                   (let [new-milestones (filterv #(not= (.-milestoneName %)
+                                                        (.-milestoneName milestone))
+                                                 milestones)
+                         have-milestones? (not (empty? new-milestones))]
+                     (when (not have-milestones?)
+                       (put! (:control timer) :stop))
+                     (assoc state
+                            :milestones new-milestones
+                            :hazMilestones have-milestones?)))))
+        (>! c result)
+        (close! c)))
+    c))
 
 (defn clear-milestones
   []
-  (swap! instance assoc :hazMilestones false :milestones [])
-  (go (>! (:control timer) :stop)))
+  (let [c (chan)]
+    (go
+      (let [result (<! (db/clear-milestones))]
+        (when-not (error? result)
+          (swap! instance assoc :hazMilestones false :milestones [])
+          (>! (:control timer) :stop))
+        (>! c result)
+        (close! c)))
+    c))
+
 
 (defn tick
   [{:keys [happensOn milestoneName] :as milestone}]
   (let [now-ms (.getTime (goog.date.DateTime.))
         happens-ms (.getTime happensOn)
         duration (quot (- happens-ms now-ms) 1000)]
-    (map->Milestone (assoc milestone :timeRemainingAsString (if (pos? duration)
-                                                              (duration->string duration milestoneName)
-                                                              (str "Huzzah for " milestoneName))))))
+    (ms/map->Milestone (assoc milestone :timeRemainingAsString (ms/format-time-remaining-string milestone)))))
 
 (defn tick-loop
   [timer]
@@ -108,17 +116,22 @@
   (let [c (chan)]
     (go
       (if has-indexed-db?
-        (do
-          (when-not (empty? (:milestones @instance))
-            (>! (:control timer) :start))
-          (tick-loop (:ticks timer))
-          (>! c {:status :ok
-                 :value indexed-db}))
-        (>! c {:status :error
-               :message "IndexedDB not supported."}))
+        (let [open-result (<! (db/open))]
+          (.log js/console "open result:" (pr-str open-result))
+          (when-not (error? open-result)
+            (swap! instance
+                   assoc
+                   :milestones (:value open-result)
+                   :hazMilestones (not (empty? (:value open-result))))
+            (when-not (empty? (:milestones @instance))
+              (>! (:control timer) :start))
+            (tick-loop (:ticks timer)))
+          (>! c open-result))
+        (>! c (make-error  "IndexedDB not supported.")))
       (close! c))
     c))
 
 (defn stop
   []
-  (go (>! (:control timer) :quit)))
+  (put! (:control timer) :quit)
+  (db/close))
